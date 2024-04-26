@@ -53,6 +53,7 @@ class Base_Scene extends Scene {
         this.shapes = {
             'cube': new Cube(),
             'outline': new Cube_Outline(),
+            'strip': new Cube_Single_Strip() //new shape
         };
 
         // *** Materials
@@ -62,6 +63,16 @@ class Base_Scene extends Scene {
         };
         // The white material and basic shader are used for drawing the outline.
         this.white = new Material(new defs.Basic_Shader());
+
+
+
+        // Button Flags
+        this.outline = false;
+        this.swing = true;
+
+        this.colors = [];
+        this.set_colors();
+        this.shapes.strip = new Cube_Single_Strip();//new shape 
     }
 
     display(context, program_state) {
@@ -84,39 +95,46 @@ class Base_Scene extends Scene {
 }
 
 export class Assignment2 extends Base_Scene {
-    /**
-     * This Scene object can be added to any display canvas.
-     * We isolate that code so it can be experimented with on its own.
-     * This gives you a very small code sandbox for editing a simple scene, and for
-     * experimenting with matrix transformations.
-     */
     set_colors() {
-        // TODO:  Create a class member variable to store your cube's colors.
-        // Hint:  You might need to create a member variable at somewhere to store the colors, using `this`.
-        // Hint2: You can consider add a constructor for class Assignment2, or add member variables in Base_Scene's constructor.
+        for (let i = 0; i < 8; i++) {
+            // random color for each cube
+            this.colors[i] = color(Math.random(), Math.random(), Math.random(), 1.0);
+        }
     }
 
     make_control_panel() {
-        // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
         this.key_triggered_button("Change Colors", ["c"], this.set_colors);
-        // Add a button for controlling the scene.
         this.key_triggered_button("Outline", ["o"], () => {
-            // TODO:  Requirement 5b:  Set a flag here that will toggle your outline on and off
+            this.outline = !this.outline;
         });
         this.key_triggered_button("Sit still", ["m"], () => {
-            // TODO:  Requirement 3d:  Set a flag here that will toggle your swaying motion on and off.
+            this.swing = !this.swing;
         });
     }
 
-    draw_box(context, program_state, model_transform, index, color) {
-        // TODO:  Helper function for requirement 3 (see hint).
-        //        This should make changes to the model_transform matrix, draw the next box, and return the newest model_transform.
-        // Hint:  You can add more parameters for this function, like the desired color, index of the box, etc.\
-        let next_transform = model_transform.times(Mat4.translation(0, 2, 0));
-        this.shapes.cube.draw(context, program_state, next_transform, this.materials.plastic.override({ color: color }));
+    draw_box(context, program_state, model_transform, index) {
+        let curr_color = this.colors[index]; // current box's random color
+        const t = this.t = program_state.animation_time / 1000;
+        const angle_target = (0.05) * Math.PI;
 
-        return next_transform;
+        let curr_angle;
+        if (this.swing == false) {
+            curr_angle = angle_target;
+        } else {
+            curr_angle = ((angle_target / 2) + (angle_target / 2) * (Math.sin(Math.PI * (t))));
+        }
+
+        if (index != 0) {
+            model_transform = model_transform.times(Mat4.translation(-1, 1, 0))
+                .times(Mat4.rotation(curr_angle, 0, 0, 1))
+                .times(Mat4.translation(1, 1, 0));
+        }
+
+        this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({ color: curr_color }));
+
+        return model_transform;
     }
+
 
     display(context, program_state) {
         super.display(context, program_state);
@@ -124,8 +142,17 @@ export class Assignment2 extends Base_Scene {
         let model_transform = Mat4.identity();
 
         for (let i = 0; i < 8; i++) {
-            model_transform = this.draw_box(context, program_state, model_transform, i, blue);
+            model_transform = this.draw_box(context, program_state, model_transform, i);
         }//draw 8 blue cubes
         //draw cube -> save matrix -> use on next cube
+    }
+
+    draw_triangle_strip(context, program_state, model_transform, color) {
+        this.shapes.strip.draw(context, program_state, model_transform, this.materials.plastic.override({ color: color }), "TRIANGLE_STRIP");
+        return model_transform;
+    }
+
+    isOdd(number) {
+        return (number % 2) == 1;
     }
 }
