@@ -146,13 +146,4 @@ export class Assignment2 extends Base_Scene {
         }//draw 8 blue cubes
         //draw cube -> save matrix -> use on next cube
     }
-
-    draw_triangle_strip(context, program_state, model_transform, color) {
-        this.shapes.strip.draw(context, program_state, model_transform, this.materials.plastic.override({ color: color }), "TRIANGLE_STRIP");
-        return model_transform;
-    }
-
-    isOdd(number) {
-        return (number % 2) == 1;
-    }
 }
