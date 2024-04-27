@@ -29,6 +29,18 @@ class Cube_Outline extends Shape {
         // When a set of lines is used in graphics, you should think of the list entries as
         // broken down into pairs; each pair of vertices will be drawn as a line segment.
         // Note: since the outline is rendered with Basic_shader, you need to redefine the position and color of each vertex
+
+        this.arrays.position = Vector3.cast(
+            [-1, -1, -1], [1, -1, -1], [1, -1, -1], [1, -1, 1], [1, -1, 1], [-1, -1, 1], [-1, -1, 1], [-1, -1, -1],  // Bottom face
+            [-1, 1, -1], [1, 1, -1], [1, 1, -1], [1, 1, 1], [1, 1, 1], [-1, 1, 1], [-1, 1, 1], [-1, 1, -1],    // Top face
+            [-1, -1, -1], [-1, 1, -1], [1, -1, -1], [1, 1, -1], [-1, -1, 1], [-1, 1, 1], [1, -1, 1], [1, 1, 1]);       // Vertical edges;
+
+        const white = color(1, 1, 1, 1);
+        for (let i = 0; i < 24; i++) {
+            this.arrays.color.push(white);
+        }
+
+        this.indices = false;
     }
 }
 
@@ -72,7 +84,7 @@ class Base_Scene extends Scene {
 
         this.colors = [];
         this.set_colors();
-        this.shapes.strip = new Cube_Single_Strip();//new shape 
+        //this.shapes.strip = new Cube_Single_Strip();//new shape 
     }
 
     display(context, program_state) {
@@ -130,15 +142,17 @@ export class Assignment2 extends Base_Scene {
                 .times(Mat4.translation(1, 1, 0));
         }
 
-        this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({ color: curr_color }));
-
+        if (this.outline == true) {
+            this.shapes.outline.draw(context, program_state, model_transform, this.white, "LINES");
+        } else {
+            this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({ color: curr_color }));
+        }
         return model_transform;
     }
 
 
     display(context, program_state) {
         super.display(context, program_state);
-        const blue = hex_color("#1a9ffa");
         let model_transform = Mat4.identity();
 
         for (let i = 0; i < 8; i++) {
