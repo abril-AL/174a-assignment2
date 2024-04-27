@@ -150,9 +150,13 @@ export class Assignment2 extends Base_Scene {
         }
 
         if (index != 0) {
-            model_transform = model_transform.times(Mat4.translation(-1, 1, 0))
+            model_transform = model_transform.times(Mat4.translation(-1, 1.5, 0))
                 .times(Mat4.rotation(curr_angle, 0, 0, 1))
+                .times(Mat4.scale(1, 1.5, 1))
                 .times(Mat4.translation(1, 1, 0));
+        }
+        else {
+            model_transform = model_transform.times(Mat4.scale(1, 1.5, 1));
         }
 
         if (this.outline == true) {
@@ -164,6 +168,7 @@ export class Assignment2 extends Base_Scene {
                 this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({ color: curr_color }));
             }
         }
+        model_transform = model_transform.times(Mat4.scale(1, (2 / 3), 1));
         return model_transform;
     }
 
