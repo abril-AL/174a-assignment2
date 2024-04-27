@@ -7,7 +7,6 @@ const {
 class Cube extends Shape {
     constructor() {
         super("position", "normal",);
-        // Loop 3 times (for each axis), and inside loop twice (for opposing cube sides):
         this.arrays.position = Vector3.cast(
             [-1, -1, -1], [1, -1, -1], [-1, -1, 1], [1, -1, 1], [1, 1, -1], [-1, 1, -1], [1, 1, 1], [-1, 1, 1],
             [-1, -1, -1], [-1, -1, 1], [-1, 1, -1], [-1, 1, 1], [1, -1, 1], [1, -1, -1], [1, 1, 1], [1, 1, -1],
@@ -16,7 +15,6 @@ class Cube extends Shape {
             [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0],
             [-1, 0, 0], [-1, 0, 0], [-1, 0, 0], [-1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0],
             [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, -1], [0, 0, -1], [0, 0, -1], [0, 0, -1]);
-        // Arrange the vertices into a square shape in texture space too:
         this.indices.push(0, 1, 2, 1, 3, 2, 4, 5, 6, 5, 7, 6, 8, 9, 10, 9, 11, 10, 12, 13,
             14, 13, 15, 14, 16, 17, 18, 17, 19, 18, 20, 21, 22, 21, 23, 22);
     }
@@ -25,11 +23,6 @@ class Cube extends Shape {
 class Cube_Outline extends Shape {
     constructor() {
         super("position", "color");
-        //  TODO (Requirement 5).
-        // When a set of lines is used in graphics, you should think of the list entries as
-        // broken down into pairs; each pair of vertices will be drawn as a line segment.
-        // Note: since the outline is rendered with Basic_shader, you need to redefine the position and color of each vertex
-
         this.arrays.position = Vector3.cast(
             [-1, -1, -1], [1, -1, -1], [1, -1, -1], [1, -1, 1], [1, -1, 1], [-1, -1, 1], [-1, -1, 1], [-1, -1, -1],  // Bottom face
             [-1, 1, -1], [1, 1, -1], [1, 1, -1], [1, 1, 1], [1, 1, 1], [-1, 1, 1], [-1, 1, 1], [-1, 1, -1],    // Top face
@@ -39,7 +32,6 @@ class Cube_Outline extends Shape {
         for (let i = 0; i < 24; i++) {
             this.arrays.color.push(white);
         }
-
         this.indices = false;
     }
 }
@@ -47,7 +39,28 @@ class Cube_Outline extends Shape {
 class Cube_Single_Strip extends Shape {
     constructor() {
         super("position", "normal");
-        // TODO (Requirement 6)
+        this.arrays.position = Vector3.cast(
+            [-1, -1, -1], [1, -1, -1], [-1, -1, 1], [1, -1, 1],
+            [-1, 1, -1], [1, 1, -1], [-1, 1, 1], [1, 1, 1]);
+
+        this.arrays.normal = Vector3.cast(
+            [-1, -1, -1], [1, -1, -1], [-1, -1, 1], [1, -1, 1],
+            [-1, 1, -1], [1, 1, -1], [-1, 1, 1], [1, 1, 1]);
+
+        this.indices.push(
+            // Bottom face
+            0, 1, 2, 2, 1, 3,
+            // Top face
+            4, 6, 5, 5, 6, 7,
+            // Front face
+            0, 4, 1, 1, 4, 5,
+            // Back face
+            2, 3, 6, 6, 3, 7,
+            // Left face
+            0, 2, 4, 4, 2, 6,
+            // Right face
+            1, 5, 3, 3, 5, 7
+        );
     }
 }
 
@@ -65,7 +78,7 @@ class Base_Scene extends Scene {
         this.shapes = {
             'cube': new Cube(),
             'outline': new Cube_Outline(),
-            'strip': new Cube_Single_Strip() //new shape
+            'singleStrip': new Cube_Single_Strip() //new shape for even cubes
         };
 
         // *** Materials
@@ -145,7 +158,11 @@ export class Assignment2 extends Base_Scene {
         if (this.outline == true) {
             this.shapes.outline.draw(context, program_state, model_transform, this.white, "LINES");
         } else {
-            this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({ color: curr_color }));
+            if ((index + 1) % 2 == 0) { //even
+                this.shapes.singleStrip.draw(context, program_state, model_transform, this.materials.plastic.override({ color: curr_color }));
+            } else { //odd
+                this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({ color: curr_color }));
+            }
         }
         return model_transform;
     }
